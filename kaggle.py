@@ -5,7 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestCentroid
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import make_classification
-
+from sklearn.neural_network import MLPClassifier
+from sklearn import svm
 import numpy as np 
 import pandas as pd 
 import csv 
@@ -18,9 +19,6 @@ testingInfo = pd.read_csv('test_final.csv')
 trainingDataFrame = pd.DataFrame(trainingInfo)
 testingDataFrame = pd.DataFrame(testingInfo)
 #print(trainingDataFrame.columns)
-
-#print(trainingDataFrame.isin(['?']).sum(axis=0))
-#print(testingDataFrame.isin(['?']).sum(axis=0))
 
 #print(trainingDataFrame.columns)
 
@@ -219,7 +217,7 @@ testingData = pd.DataFrame(
     testingDataFrame['capital.gain'], testingDataFrame['capital.loss'], testingDataFrame['hours.per.week']], 
     columns = ['relationship','education','fnlwgt', 'race','occupation','gender','marital.status','workclass', 'age', 'capital.gain', 'capital.loss', 'hours.per.week'])
 
-logisticReg = LogisticRegression(max_iter=500)
+logisticReg = LogisticRegression(max_iter=1000)
 
 logisticReg.fit(trainingData_x, trainingData_y.values.ravel())
 
@@ -233,12 +231,12 @@ with open(r"LogisticRegressionOutput.csv", 'a', newline='') as file:
     for i in range(len(LogisticRegressionPredictions)):
         writer.writerow([i+1,LogisticRegressionPredictions[i]])
 
+#Changed from 2 to 4 to 6 to 10 to 15 (best performance) (got worse) to 20 to 18 to 16
+clf = RandomForestClassifier(max_depth=15, random_state=0)
 
-clf = RandomForestClassifier(max_depth=2, random_state=0)
 clf.fit(trainingData_x, trainingData_y.values.ravel())
 
 randomForestPredictions = clf.predict_proba(testingData)[:,1]
-
 print(randomForestPredictions)
 
 with open(r"RandomForestOutput.csv", 'a', newline='') as file:
@@ -246,3 +244,32 @@ with open(r"RandomForestOutput.csv", 'a', newline='') as file:
     writer.writerow(['ID', 'Prediction'])
     for i in range(len(randomForestPredictions)):
         writer.writerow([i+1,randomForestPredictions[i]])
+
+#ADDED ALL THIS
+
+# NN = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
+# NN.fit(trainingData_x, trainingData_y.values.ravel())
+
+# neuralNetworkPredictions = NN.predict_proba(testingData)[:,1]
+
+# print(neuralNetworkPredictions)
+
+# with open(r"NeuralNetworkOutput.csv", 'a', newline='') as file:
+#     writer = csv.writer(file)
+#     writer.writerow(['ID', 'Prediction'])
+#     for i in range(len(neuralNetworkPredictions)):
+#         writer.writerow([i+1,neuralNetworkPredictions[i]])
+
+
+# SVMachine = svm.SVC(probability=True)
+
+# SVMachine.fit(trainingData_x, trainingData_y.values.ravel())
+
+# SVMPredictions = SVMachine.predict_proba(testingData)[:,1]
+# print(SVMPredictions)
+
+# with open(r"SVMOutput.csv", 'a', newline='') as file:
+#     writer = csv.writer(file)
+#     writer.writerow(['ID', 'Prediction'])
+#     for i in range(len(SVMPredictions)):
+#         writer.writerow([i+1,SVMPredictions[i]])
