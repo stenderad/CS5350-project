@@ -16,18 +16,13 @@ import numpy as np
 import pandas as pd 
 import csv 
 
-#USE CONDA PROJECT
+#Read in Data
 
 trainingInfo  = pd.read_csv('train_final.csv')
 testingInfo = pd.read_csv('test_final.csv')
 
-#print(trainingInfo.describe())
-
 trainingDataFrame = pd.DataFrame(trainingInfo)
 testingDataFrame = pd.DataFrame(testingInfo)
-#print(trainingDataFrame.columns)
-
-#print(trainingDataFrame.columns)
 
 #Process Data
 
@@ -38,10 +33,6 @@ testingDataFrame.loc[testingDataFrame.occupation == '?', ['occupation']] = occup
 workclassMode = trainingDataFrame['workclass'].mode()[0]
 trainingDataFrame.loc[trainingDataFrame.workclass == '?', ['workclass']] = workclassMode
 testingDataFrame.loc[testingDataFrame.workclass == '?', ['workclass']] = workclassMode
-
-print(occupationMode)
-print(workclassMode)
-
 
 trainingDataFrame['sex'] = trainingDataFrame['sex'].map(
     {
@@ -233,6 +224,8 @@ testingData = pd.DataFrame(
     testingDataFrame['capital.gain'], testingDataFrame['capital.loss'], testingDataFrame['hours.per.week']], 
     columns = ['relationship','education', 'race','occupation','gender','marital.status','workclass', 'age', 'capital.gain', 'capital.loss', 'hours.per.week'])
 
+#Logistical Regression
+
 logisticReg = LogisticRegression(max_iter=1000)
 
 logisticReg.fit(trainingData_x, trainingData_y.values.ravel())
@@ -247,11 +240,13 @@ with open(r"LogisticRegressionOutput.csv", 'a', newline='') as file:
     for i in range(len(LogisticRegressionPredictions)):
         writer.writerow([i+1,LogisticRegressionPredictions[i]])
 
-clf = RandomForestClassifier(max_depth=14, random_state=0)
+#Random Forest
 
-clf.fit(trainingData_x, trainingData_y.values.ravel())
+randomForest = RandomForestClassifier(max_depth=14, random_state=0)
 
-randomForestPredictions = clf.predict_proba(testingData)[:,1]
+randomForest.fit(trainingData_x, trainingData_y.values.ravel())
+
+randomForestPredictions = randomForest.predict_proba(testingData)[:,1]
 print(randomForestPredictions)
 
 with open(r"RandomForestOutput.csv", 'a', newline='') as file:
@@ -260,17 +255,21 @@ with open(r"RandomForestOutput.csv", 'a', newline='') as file:
     for i in range(len(randomForestPredictions)):
         writer.writerow([i+1,randomForestPredictions[i]])
 
+#SVM
+
 svm = make_pipeline(StandardScaler(), SVC(gamma='auto', probability=True))
 svm.fit(trainingData_x, trainingData_y.values.ravel())
 
 SVMPrediction = svm.predict_proba(testingData)[:,1]
-
+print(SVMPrediction)
 
 with open(r"SVMOutput.csv", 'a', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(['ID', 'Prediction'])
     for i in range(len(SVMPrediction)):
         writer.writerow([i+1,SVMPrediction[i]])
+
+#Neural Network
 
 NN = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(5, 2), random_state=1)
 NN.fit(trainingData_x, trainingData_y.values.ravel())
